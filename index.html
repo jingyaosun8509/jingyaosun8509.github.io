@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>豹豹子生日快乐</title>
+  <title>生日快乐</title>
   <style>
     :root{
       --bg1:#fff7f0; --bg2:#fde9f2; --ink:#2b2b2b; --muted:#666;
@@ -61,11 +61,11 @@
   <div class="wrap">
     <div class="card">
       <div class="hero">
-        <img src="assets/photo.jpg" alt="照片" />
+        <img src="assets/photo.png" alt="照片" />
       </div>
 
       <div class="content">
-        <h1>生日快乐，<span id="name">XXX</span></h1>
+        <h1>生日快乐</h1>
         <p>
           祝亲爱的豹豹子大美女，我们的老赵————生日快乐呀～
           为了让你高兴，本猴和隔壁那只老狼可是操碎了心，因鄙人绘画能力实在太差，只能鞭笞chat同学进行绘画。
@@ -76,48 +76,43 @@
       </div>
 
       <div class="actions">
-        <button class="primary" id="toggle">播放音乐</button>
-        <button id="replay">从头播放</button>
+        <button class="primary" id="muteBtn">打开声音</button>
       </div>
     </div>
 
-    <audio id="audio" preload="metadata" src="assets/music.mp3"></audio>
+    <!-- 手机浏览器通常允许“静音自动播放”，不允许“带声音自动播放” -->
+    <audio id="audio" src="assets/music.mp3" autoplay muted loop playsinline></audio>
   </div>
 
   <script>
-    // 手机浏览器通常禁止“自动播放”，所以用按钮触发播放最稳。
     const audio = document.getElementById('audio');
-    const toggle = document.getElementById('toggle');
-    const replay = document.getElementById('replay');
+    const muteBtn = document.getElementById('muteBtn');
 
-    const setLabel = () => {
-      toggle.textContent = audio.paused ? '播放音乐' : '暂停音乐';
-    };
+    function setLabel() {
+      muteBtn.textContent = audio.muted ? '打开声音' : '静音';
+    }
 
-    toggle.addEventListener('click', async () => {
-      try {
-        if (audio.paused) await audio.play();
-        else audio.pause();
-      } catch (e) {
-        // 某些机型需要再次点击或先解除静音/音量限制
-      }
+    async function tryAutoPlay() {
+      try { await audio.play(); } catch (e) {}
+    }
+
+    // 进页面就尝试自动播放（通常会以“静音播放”成功）
+    tryAutoPlay();
+
+    // 如果某些机型没自动播，用户第一次触碰页面时再补一次
+    window.addEventListener('pointerdown', tryAutoPlay, { once: true });
+
+    muteBtn.addEventListener('click', async () => {
+      audio.muted = !audio.muted;
       setLabel();
+      if (!audio.paused) return;
+      try { await audio.play(); } catch (e) {}
     });
-
-    replay.addEventListener('click', async () => {
-      try {
-        audio.currentTime = 0;
-        await audio.play();
-      } catch (e) {}
-      setLabel();
-    });
-
-    audio.addEventListener('play', setLabel);
-    audio.addEventListener('pause', setLabel);
-    setLabel();
 
     document.getElementById('today').textContent =
       new Date().toLocaleDateString('zh-CN', { year:'numeric', month:'long', day:'numeric' });
+
+    setLabel();
   </script>
 </body>
 </html>
